@@ -87,12 +87,14 @@ class RouterosScriptTests(unittest.TestCase):
 
 class SmbBaselineTests(unittest.TestCase):
     def test_baseline_band_accepts_its_edges(self):
-        self.assertTrue(rates_inside(710, 630, 710, 724, 630, 640))
-        self.assertTrue(rates_inside(724, 640, 710, 724, 630, 640))
+        self.assertTrue(rates_inside(360, 360, 360, 738, 360, 793))
+        self.assertTrue(rates_inside(738, 793, 360, 738, 360, 793))
 
     def test_baseline_band_rejects_a_drop(self):
-        self.assertFalse(rates_inside(709, 635, 710, 724, 630, 640))
-        self.assertFalse(rates_inside(715, 629, 710, 724, 630, 640))
+        self.assertFalse(rates_inside(359, 400, 360, 738, 360, 793))
+        self.assertFalse(rates_inside(400, 359, 360, 738, 360, 793))
+        self.assertFalse(rates_inside(739, 400, 360, 738, 360, 793))
+        self.assertFalse(rates_inside(400, 794, 360, 738, 360, 793))
 
 
 if __name__ == "__main__":

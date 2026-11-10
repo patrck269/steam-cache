@@ -43,7 +43,7 @@
 
 - [ ] **Step 1: Write the tests in `tests/test_lancache_plan.py`**
 
-The tests assert: a 2 TiB disk caps at `1843g`; port 80 up yields one `A` record with `ttl=10s` for `192.0.2.50`; port 80 down yields `None`; an IPv6 address raises `ValueError`; the virtual machine is 2 vCPU and 4096 MB and listens on port 80; the health interval is 10 seconds; netwatch uses `type=tcp-conn`, `port=80`, `interval=10s`; compose publishes `80:80` and `CACHE_DISK_SIZE` and does not mention 443; SMB rates 710–724 write and 630–640 read are inside, and 709 or 629 are outside.
+The tests assert: a 2 TiB disk caps at `1843g`; port 80 up yields one `A` record with `ttl=10s` for `192.0.2.50`; port 80 down yields `None`; an IPv6 address raises `ValueError`; the virtual machine is 2 vCPU and 4096 MB and listens on port 80; the health interval is 10 seconds; netwatch uses `type=tcp-conn`, `port=80`, `interval=10s`; compose publishes `80:80` and `CACHE_DISK_SIZE` and does not mention 443; SMB rates 360–738 write and 360–793 read are inside, and 359 or 794 are outside.
 
 - [ ] **Step 2: Run the tests and confirm they fail before the functions exist**
 
@@ -106,7 +106,7 @@ The client constraint names the server and the 10G adapter. Keep that constraint
 
 - [ ] **Step 5: Copy 8 GiB to the stripe and back**
 
-Pass only when `rates_inside` is true for the ranges in `local.md` (write 710 through 724, read 630 through 640). If either direction is outside, remove the virtual switch, restore the physical adapter's address, and stop. Do not treat later checks as success.
+Pass only when `rates_inside` is true for the ranges in `local.md` (write 360 through 738, read 360 through 793). Those ranges are the uncached rates measured on the stripe. The older 710–724 / 630–640 figure was a different disk and is not the gate. If either direction is outside, remove the virtual switch, restore the physical adapter's address, and stop. Do not treat later checks as success.
 
 ### Task 4: Virtual machine and Lancache
 
