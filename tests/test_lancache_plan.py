@@ -70,6 +70,11 @@ class RouterosScriptTests(unittest.TestCase):
         self.assertIn("interval=10s", watch)
         self.assertIn("host=192.0.2.50", watch)
         self.assertNotIn("AAAA", "\n".join(commands))
+        stored = [command for command in commands if command.startswith("/system script add")]
+        self.assertEqual(len(stored), 2)
+        for command in stored:
+            self.assertIn("\\$i", command)
+            self.assertNotIn(" $i", command)
 
     def test_compose_listens_on_port_80_only(self):
         text = compose_yaml("lancachenet/monolithic@sha256:abc", "1843g")

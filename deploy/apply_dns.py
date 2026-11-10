@@ -28,12 +28,15 @@ def netwatch_commands(ipv4: str) -> list:
         raise ValueError("refusing to install a watch with no address")
     down = routeros_down_script()
     up = routeros_up_script(ipv4)
+    # RouterOS expands $ while it stores a script. Keep the loop variable for later.
+    stored_down = down.replace("$", "\\$")
+    stored_up = up.replace("$", "\\$")
     return [
         ":foreach i in=[/system script find where name=lancache-down] do={ /system script remove $i }",
         ":foreach i in=[/system script find where name=lancache-up] do={ /system script remove $i }",
         ":foreach i in=[/tool netwatch find where name=lancache-http] do={ /tool netwatch remove $i }",
-        f"/system script add name=lancache-down source={{ {down} }}",
-        f"/system script add name=lancache-up source={{ {up} }}",
+        f'/system script add name=lancache-down source="{stored_down}"',
+        f'/system script add name=lancache-up source="{stored_up}"',
         (
             "/tool netwatch add name=lancache-http "
             f"host={ipv4} type=tcp-conn port={LISTEN_PORT} "
@@ -56,10 +59,20 @@ def main() -> int:
     ipv4 = load_vm_ipv4()
     for command in netwatch_commands(ipv4):
         print(command, flush=True)
-        subprocess.run(
+        result = subprocess.run(
             ["ssh", "router", command],
-            check=True,
+            check=False,
+            capture_output=True,
+            text=True,
         )
+        if result.stdout:
+            print(result.stdout, end="" if result.stdout.endswith("\n") else "\n", flush=True)
+        if result.stderr:
+            print(result.stderr, end="" if result.stderr.endswith("\n") else "\n", file=sys.stderr, flush=True)
+        combined = f"{result.stdout}\n{result.stderr}".lower()
+        if result.returncode != 0 or "syntax error" in combined or "no such item" in combined or "failure:" in combined:
+            print(f"router command failed ({result.returncode})", file=sys.stderr, flush=True)
+            return 1
     print(f"published {RECORD_NAME} -> {ipv4}", flush=True)
     return 0
 
